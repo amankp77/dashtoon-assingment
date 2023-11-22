@@ -1,15 +1,75 @@
 // src/App.js
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useRef } from "react";
+import "./App.css";
 
-const API_URL = "https://xdwvg9no7pefghrn.us-east-1.aws.endpoints.huggingface.cloud";
-const API_KEY = "VknySbLLTUjbxXAXCjyfaFIPwUTCeRXbFSOjwRiCxsxFyhbnGjSFalPKrpvvDAaPVzWEevPljilLVDBiTzfIbWFdxOkYJxnOPoHhkkVGzAknaOulWggusSFewzpqsNWM";
+const API_URL =
+  "https://xdwvg9no7pefghrn.us-east-1.aws.endpoints.huggingface.cloud";
+const API_KEY =
+  "VknySbLLTUjbxXAXCjyfaFIPwUTCeRXbFSOjwRiCxsxFyhbnGjSFalPKrpvvDAaPVzWEevPljilLVDBiTzfIbWFdxOkYJxnOPoHhkkVGzAknaOulWggusSFewzpqsNWM";
 
 function App() {
-  const [comicText, setComicText] = useState(Array(10).fill(''));
-  const [annotationPanelText, setAnnotationPanelText] = useState(Array(10).fill(''));
+  const [comicText, setComicText] = useState(Array(10).fill(""));
+  const [annotationPanelText, setAnnotationPanelText] = useState(
+    Array(10).fill("")
+  );
   const [comicImages, setComicImages] = useState(Array(10).fill(null));
   const [loading, setLoading] = useState(false);
+
+  const comicDisplayRef = useRef(null);
+
+  const handleDownloadComic = () => {
+    const canvas = document.createElement("canvas");
+    const ctx = canvas.getContext("2d");
+
+    // Set canvas dimensions based on the comic display size
+    canvas.width = comicDisplayRef.current.offsetWidth;
+    canvas.height = comicDisplayRef.current.offsetHeight;
+
+    const comicPanels =
+    comicDisplayRef.current.querySelectorAll(".comic-panel");
+
+
+    const image = document.querySelector('.hero');
+    console.log(image)
+    ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+    comicPanels.forEach((panel, index) => {
+      const img = panel.querySelector("img");
+      const annotationBox = panel.querySelector(".box1");
+      const imgX = panel.offsetLeft - 561;
+      const imgY = panel.offsetTop;
+      const imgWidth = img.width;
+      const imgHeight = img.height;
+  
+
+      // Draw the image onto the canvas
+      ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
+
+      // Draw the annotation box onto the canvas
+      console.log(annotationBox)
+      if (annotationBox) {
+        const annotation = annotationBox.querySelector(".annotation").innerText;
+        const boxX = imgX + 20;
+        const boxY = imgY + annotationBox.offsetTop;
+        const boxWidth = annotationBox.offsetWidth;
+        const boxHeight = annotationBox.offsetHeight;
+        console.log(boxY,boxX,boxWidth,boxHeight);
+        ctx.fillStyle = "white"; // Set the background color of the annotation box
+        ctx.fillRect(boxX, boxY, 200, 30);
+
+        ctx.font = "24px Arial";
+        ctx.fillStyle = "black"; // Set the text color of the annotation
+        ctx.fillText(annotation, boxX + 10, boxY + 25); // Adjust the position as needed
+      }
+    });
+
+    // Convert the canvas content to a data URL and trigger download
+      const dataUrl = canvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = dataUrl;
+      a.download = "comic_collage.png";
+      a.click(); 
+  };
 
   const handleInputChange = (index, value) => {
     const newText = [...comicText];
@@ -27,13 +87,15 @@ function App() {
     try {
       setLoading(true);
 
-      
       const images = await Promise.all(
         comicText.map(async (text, index) => {
           if (!text) {
-            return { imageUrl: null, annotation: "Write some text instead of generating an image." };
+            return {
+              imageUrl: null,
+              annotation: "Write some text instead of generating an image.",
+            };
           }
-          
+
           const data = { inputs: text };
           const response = await query(data);
 
@@ -42,117 +104,129 @@ function App() {
             const imageUrl = URL.createObjectURL(imageBlob);
             return { imageUrl, annotation: annotationPanelText[index] };
           } else {
-            console.error(`Error for Panel ${index + 1}: ${response.statusText}`);
-            return { imageUrl: null, annotation: `Error: ${response.statusText}` };
+            console.error(
+              `Error for Panel ${index + 1}: ${response.statusText}`
+            );
+            return {
+              imageUrl: null,
+              annotation: `Error: ${response.statusText}`,
+            };
           }
         })
       );
 
       setComicImages(images);
     } catch (error) {
-      console.error('Error:', error.message);
+      console.error("Error:", error.message);
     } finally {
       setLoading(false);
     }
   };
 
   const handleGenerateAnotherComic = () => {
-    setComicText(Array(10).fill(''));
-    setAnnotationPanelText(Array(10).fill(''));
+    setComicText(Array(10).fill(""));
+    setAnnotationPanelText(Array(10).fill(""));
     setComicImages(Array(10).fill(null));
   };
 
   const query = async (data) => {
     try {
-      const response = await fetch(
-        API_URL,
-        {
-          headers: {
-            "Accept": "image/png",
-            "Authorization": `Bearer ${API_KEY}`,
-            "Content-Type": "application/json"
-          },
-          method: "POST",
-          body: JSON.stringify(data),
-        }
-      );
-        
+      const response = await fetch(API_URL, {
+        headers: {
+          Accept: "image/png",
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
       if (!response.ok) {
         throw new Error(`HTTP error! Status: ${response.status}`);
       }
 
       return response;
     } catch (error) {
-      console.error('Error in query function:', error.message);
+      console.error("Error in query function:", error.message);
       throw error;
     }
   };
 
   return (
     <div className="App">
-    <div className="container">
-      <div className="left">
-      <header>
-        <h1>Imagine Your Comics</h1>
-      </header>
-      <form onSubmit={(e) => e.preventDefault()}>
-        {comicText.map((text, index) => (
-          <div key={index} className="panel-inputs">
-            <div className="panel-text">
-              <label>{`Panel ${index + 1}: `}</label>
-              <textarea
-                className='textarea-name'
-                value={text}
-                onChange={(e) => handleInputChange(index, e.target.value)}
-              />
-            </div>
-            <div className="annotation-text">
-              <label>{`Speech bubbles ${index + 1}: `}</label>
-              <textarea
-                className='textarea-anot'
-                value={annotationPanelText[index]}
-                onChange={(e) => handleAnnotationChange(index, e.target.value)}
-              />
-            </div>
-          </div>
-        ))}
+      <div className="container">
+        <div className="left">
+          <header>
+            <h1>Imagine Your Comics</h1>
+          </header>
+          <form onSubmit={(e) => e.preventDefault()}>
+            {comicText.map((text, index) => (
+              <div key={index} className="panel-inputs">
+                <div className="panel-text">
+                  <textarea
+                    placeholder="Describe Image"
+                    className="textarea-name"
+                    value={text}
+                    onChange={(e) => handleInputChange(index, e.target.value)}
+                  />
+                </div>
+                <div className="Annotation-text">
+                  <textarea
+                    placeholder="Annotations"
+                    className="textarea-anot"
+                    value={annotationPanelText[index]}
+                    onChange={(e) =>
+                      handleAnnotationChange(index, e.target.value)
+                    }
+                  />
+                </div>
+              </div>
+            ))}
 
-        <div className="buttons">
-
-        <button type="button" onClick={handleSubmit} disabled={loading}>
-          {loading ? 'Generating...' : 'Make Comic'}
-        </button>
-        <button type="button" onClick={handleGenerateAnotherComic}>
-          Make New Comic
-        </button>
+            <div className="buttons">
+              <button type="button" onClick={handleSubmit} disabled={loading}>
+                {loading ? "Generating..." : "Make Comic"}
+              </button>
+              <button type="button" onClick={handleGenerateAnotherComic}>
+                Make New Comic
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+        {/* {loading && <div className="loader"></div>} */}
+        <div className="right" ref={comicDisplayRef}>
+          <div className="comic-display">
+            {comicImages.map(
+              (panel, index) =>
+                panel && (
+                  <div key={index} className="comic-panel">
+                    {panel.imageUrl ? (
+                      <img
+                        src={panel.imageUrl}
+                        alt={`Create more ${index + 1}`}
+                        height="350px"
+                      />
+                    ) : (
+                      <div></div>
+                    )}
+                    {panel.annotation !==
+                    "Write some text instead of generating an image." ? (
+                      <div className="box box1">
+                        <div className="annotation">{panel.annotation}</div>
+                      </div>
+                    ) : (
+                      <div></div>
+                    )}
+                  </div>
+                )
+            )}
+          </div>
+          <button onClick={handleDownloadComic}>Download Comic</button>
+        </div>
       </div>
-      {/* {loading && <div className="loader"></div>} */}
-      <div className="right">
-      <div className="comic-display">
-        {comicImages.map((panel, index) => (
-          panel && (
-            <div key={index} className="comic-panel">
-              {panel.imageUrl ? (
-                <img src={panel.imageUrl} alt={`Create more ${index + 1}`} />
-              ) : (
-                <div className="default-text">{panel.annotation}</div>
-              )}
-              {panel.annotation!=="Write some text instead of generating an image."?
-              <div className="box box1">
-              <div className="annotation">{panel.annotation}</div>
-              </div>:
-              <div></div>}
-            </div>
-          )
-        ))}
-      </div>
-    </div>
-    </div>
+        <img src={require('./Assets/Hero.jpg')} alt=""  style={{display:"none"}} className="hero"/>
     </div>
   );
 }
 
 export default App;
-
