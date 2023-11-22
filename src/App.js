@@ -221,7 +221,7 @@ function App() {
                 )
             )}
           </div>
-          <button onClick={handleDownloadComic}>Download Comic</button>
+          <button className="download" onClick={handleDownloadComic}>Download Comic</button>
         </div>
       </div>
         <img src={require('./Assets/Hero.jpg')} alt=""  style={{display:"none"}} className="hero"/>
