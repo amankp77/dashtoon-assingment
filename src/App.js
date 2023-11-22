@@ -34,7 +34,12 @@ function App() {
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     comicPanels.forEach((panel, index) => {
+
+    
       const img = panel.querySelector("img");
+      if(!img){
+        return;
+      }
       const annotationBox = panel.querySelector(".box1");
       const imgX = panel.offsetLeft - 561;
       const imgY = panel.offsetTop;
@@ -204,7 +209,7 @@ function App() {
                       <img
                         src={panel.imageUrl}
                         alt={`Create more ${index + 1}`}
-                        height="350px"
+                        height="250px"
                       />
                     ) : (
                       <div></div>
