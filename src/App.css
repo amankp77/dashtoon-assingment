@@ -7,6 +7,21 @@ body {
   padding: 0;
   font-family: 'Arial', sans-serif;
 }
+
+body::-webkit-scrollbar{
+  width: 8px;
+}
+
+body::-webkit-scrollbar-thumb{
+   border-radius: 10px;
+     background-color:rgb(186, 183, 183) 
+}
+
+body::-webkit-scrollbar-track{
+  background-color: white;
+}
+
+
 /* For Annotations in comic style */
 .box{
   margin:25px;
@@ -215,6 +230,15 @@ label {
   margin-bottom: 5px;
 }
 
+.download{
+   border: 2px solid #32425b;
+   color: #32425b;
+}
+
+.download:hover{
+  background-color: #32425b;
+  color: white;
+}
 
 
 /* Media Query */

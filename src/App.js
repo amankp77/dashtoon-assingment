@@ -58,12 +58,12 @@ function App() {
       if (annotationBox) {
         const annotation = annotationBox.querySelector(".annotation").innerText;
         const boxX = imgX + 20;
-        const boxY = imgY + annotationBox.offsetTop;
+        const boxY = imgY + annotationBox.offsetTop + 32;
        
         ctx.fillStyle = "white"; // Set the background color of the annotation box
-        ctx.fillRect(boxX, boxY, 200, 30);
+        ctx.fillRect(boxX, boxY, 230, 30);
 
-        ctx.font = "24px Arial";
+        ctx.font = "20px Bangers";
         ctx.fillStyle = "black"; // Set the text color of the annotation
         ctx.fillText(annotation, boxX + 10, boxY + 25); // Adjust the position as needed
       }
