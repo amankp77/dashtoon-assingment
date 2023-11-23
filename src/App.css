@@ -10,8 +10,9 @@ body {
 /* For Annotations in comic style */
 .box{
   margin:25px;
-  width:60px;
+  width:fit-content;
   height:40px;
+  padding: 5px;
   background:#ddd;
   border: solid black;
   border-color: black;
@@ -50,7 +51,6 @@ body {
   position: relative;
 }
 .annotation{
-  
   font-family: 'Bangers', cursive;
 }
 /* end */
@@ -184,7 +184,7 @@ label{
 ;
   justify-content: space-between;
   margin-top: 1rem;
-  width: 90%;
+  width: 70%;
 }
 
 button{
@@ -223,6 +223,24 @@ label {
   .panel-inputs,.buttons{
       flex-direction: column;
   }
+
+  .panel-text{
+    margin: 0;
+  }
+  .panel-inputs{
+    width: 100%;
+  }
+
+  .Annotation-text{
+    overflow: hidden;
+  }
+
+  textarea{
+    width: 100%;
+  }
+  .panel-inputs > *{
+    width: 100%;
+  }
   
   /* img{
     width: 25rem;
@@ -253,6 +271,12 @@ label {
     flex-direction: column;
     align-items: center;
 }
+  .panel-inputs{
+    width: 90% ;
+  }
+  .panel-inputs > *{
+    width: 100%;
+  }
   
 }
 

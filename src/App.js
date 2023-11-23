@@ -30,19 +30,22 @@ function App() {
 
 
     const image = document.querySelector('.hero');
-    console.log(image)
+    
     ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
 
     comicPanels.forEach((panel, index) => {
 
-    
+      const leftPanel = document.querySelector('.left');
+      const rect = leftPanel.getBoundingClientRect();
       const img = panel.querySelector("img");
       if(!img){
         return;
       }
+    
       const annotationBox = panel.querySelector(".box1");
-      const imgX = panel.offsetLeft - 561;
-      const imgY = panel.offsetTop;
+      const imgX = panel.offsetLeft -  (window.screen.width<800?0:rect.width ) - 64;
+      const imgY = panel.offsetTop - (window.screen.width<800?rect.height:0);
+      console.log(index,rect.width,rect.height,imgX,imgY,panel.offsetTop,panel.offsetLeft)
       const imgWidth = img.width;
       const imgHeight = img.height;
   
@@ -51,14 +54,12 @@ function App() {
       ctx.drawImage(img, imgX, imgY, imgWidth, imgHeight);
 
       // Draw the annotation box onto the canvas
-      console.log(annotationBox)
+      
       if (annotationBox) {
         const annotation = annotationBox.querySelector(".annotation").innerText;
         const boxX = imgX + 20;
         const boxY = imgY + annotationBox.offsetTop;
-        const boxWidth = annotationBox.offsetWidth;
-        const boxHeight = annotationBox.offsetHeight;
-        console.log(boxY,boxX,boxWidth,boxHeight);
+       
         ctx.fillStyle = "white"; // Set the background color of the annotation box
         ctx.fillRect(boxX, boxY, 200, 30);
 
@@ -193,7 +194,7 @@ function App() {
                 {loading ? "Generating..." : "Make Comic"}
               </button>
               <button type="button" onClick={handleGenerateAnotherComic}>
-                Make New Comic
+                Restart
               </button>
             </div>
           </form>
@@ -214,7 +215,7 @@ function App() {
                     ) : (
                       <div></div>
                     )}
-                    {panel.annotation !==
+                    {panel.annotation!=="" && panel.annotation !==
                     "Write some text instead of generating an image." ? (
                       <div className="box box1">
                         <div className="annotation">{panel.annotation}</div>
